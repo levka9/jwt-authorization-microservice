@@ -5,6 +5,9 @@ Microservice Json Web Token Authentication, use:
 * JWT Authentication API
 * Entity Framework
 
+## Database schema
+https://github.com/levka9/microservice-jwt-authorization/blob/master/LocalDB/diagram.png
+
 ## Requests
 * Get new token
 * Check if existing token is valid
@@ -12,6 +15,7 @@ Microservice Json Web Token Authentication, use:
 ## Request examples:
 
 1. Create a new token:
+
 Method Get:
 ```console
 http://localhost:30796/api/token/get?username=test1&password=123456
