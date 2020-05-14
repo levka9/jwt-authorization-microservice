@@ -1,0 +1,6 @@
+﻿-- Update Entities DB Rirst
+Scaffold-DbContext "Server=USER9-PC\MSSQLSERVER2020;Database=jwt_auth;user id=sa;password=123456;Integrated Security=True;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer -Context JWTAuthContext -ContextDir Context -OutputDir Entities -Project JWT.Auth -force
+
+-- Code First 
+run from PM: add-migration wizdi_preprod -Context YavneBonusContext
+run from PM: update-database –verbose
