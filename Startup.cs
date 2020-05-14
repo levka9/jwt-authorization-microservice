@@ -6,15 +6,15 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using JWT.Auth.Helpers;
-using JwtWebTokenSerice.Services;
 using Microsoft.EntityFrameworkCore;
-using WebApiAuthentication.Services.Interfaces;
 using Microsoft.AspNetCore.Diagnostics;
 using System.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using JWT.Auth.Entities;
 using Microsoft.Extensions.Hosting;
+using AutoMapper;
+using Newtonsoft.Json;
 
 namespace JwtWebTokenSerice
 {
@@ -45,7 +45,13 @@ namespace JwtWebTokenSerice
                                       );
             });
 
-            services.AddControllers();
+            services.AddAutoMapper(typeof(Startup));
+
+            services.AddControllers()
+                    .AddNewtonsoftJson(o =>
+                    {
+                        o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    });
 
             // configure strongly typed settings objects
             var appSettingsSection = Configuration.GetSection("AppSettings");
@@ -72,9 +78,8 @@ namespace JwtWebTokenSerice
             //            };
             //        }); 
             #endregion
-                        
-            // configure DI for application services
-            services.AddScoped<IUserService, UserService>();
+
+            // configure DI for application services            
             //services.AddScoped<IWebTokenIdentityGenericRepository<Token, long>, TokenRepository>();
             //services.AddScoped<IUserRepository, UserRepository>();
         }

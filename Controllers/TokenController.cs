@@ -32,7 +32,7 @@ namespace JwtWebTokenSerice.Controllers
 
         //[EnableCors("CorsPolicy")]
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery]UserRequest UserParam)
+        public async Task<IActionResult> Get([FromQuery]UserTokenRequest UserParam)
         {
             var browserCapabilities = HttpContext.Request.Headers["User-Agent"].ToString();
             var ipAdderess = HttpContext.Connection.RemoteIpAddress;
