@@ -6,7 +6,7 @@ Microservice Json Web Token Authentication, use:
 * Entity Framework
 
 ## Database schema
-![Image description](https://github.com/levka9/microservice-jwt-authorization/blob/master/LocalDB/diagram.png)
+![Image description](LocalDB/diagram.png)
 
 ## Requests
 * Get new token
