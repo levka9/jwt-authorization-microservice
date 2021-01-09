@@ -1,5 +1,6 @@
 ﻿-- Update Entities DB Rirst
-Scaffold-DbContext "Server=USER9-PC\MSSQLSERVER2020;Database=jwt_auth;user id=sa;password=123456;Integrated Security=True;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer -Context JWTAuthContext -ContextDir Context -OutputDir Entities -Project JWT.Auth -force
+Scaffold-DbContext "Server=USER9-PC\MSSQLSERVER2020;Database=JwtAuth;user id=sa;password=123456;Integrated Security=True;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer -Context JWTAuthContext -ContextDir Context -OutputDir Entities -Project JWT.Auth -force
+Scaffold-DbContext "Data Source=DESKTOP-I8BM850\SQLEXPRESS;AttachDbFilename=F:\Microservices\JWT-Auth.Microservice\LocalDB\jwt_auth.mdf;Integrated Security=True;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer -Context JWTAuthContext -ContextDir Entities\Context -OutputDir Entities -Project JWT.Auth.Microservice -force
 
 -- Code First 
 run from PM: add-migration wizdi_preprod -Context YavneBonusContext

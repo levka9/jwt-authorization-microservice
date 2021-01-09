@@ -1,10 +1,13 @@
-﻿using System.IO;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using JwtWebTokenSerice;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace JwtWebTokenSerice
+namespace JWT_Auth.Microservice
 {
     public class Program
     {

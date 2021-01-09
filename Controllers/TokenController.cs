@@ -3,12 +3,12 @@ using JwtWebTokenSerice.Modules;
 using Microsoft.Extensions.Options;
 using JWT.Auth.Helpers;
 using System.Threading.Tasks;
-using JWT.Auth.Entities;
 using Microsoft.EntityFrameworkCore;
 using JWT.Auth.Models.Requests;
 using System.Linq;
 using JWT.Auth.Modules.Interafaces;
 using Microsoft.AspNetCore.Cors;
+using JWT.Auth.Entities.Context;
 
 namespace JwtWebTokenSerice.Controllers
 {        

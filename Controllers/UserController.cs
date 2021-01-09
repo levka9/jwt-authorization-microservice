@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using JWT.Auth.Entities;
+using JWT.Auth.Entities.Context;
 using JWT.Auth.Models.Requests;
 using JWT.Auth.Modules;
+using JWT.Auth.Modules.Interafaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,30 +16,55 @@ namespace JWT.Auth.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class UserController : ApiBaseController
     {
-        IMapper mapper;
-        JWTAuthContext context;
+        IUserModule userModule;
 
-        public UserController(JWTAuthContext Context, IMapper Mapper)
+        public UserController(IUserModule UserModule)
         {
-            this.mapper = Mapper;
-            this.context = Context;
+            userModule = UserModule;
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Get()
         {
-            return Ok("test");
+            long? userId = GetUserIdFromToken();
+
+            var user = await userModule.Get(userId);
+
+            return Ok(user);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetTotal()
+        {
+            var count = await userModule.Quantity();
+
+            return Ok(new { TotalUsers = count });
+        }
+
+        [HttpGet]
+        public IActionResult Test()
+        {
+            return Ok("Web server running.");
         }
 
         [HttpPut]
         public async Task<IActionResult> Create([FromBody]CreateUserRequest User)
         {
-            var userModule = new UserModule(context, mapper);
             var response = await userModule.Add(User);
 
             return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Update([FromBody]UpdateUserRequest Request)
+        {
+            var response = await userModule.Update(Request);
+
+            return null;
         }
     }
 }

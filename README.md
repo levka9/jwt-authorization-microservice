@@ -10,9 +10,12 @@ Microservice Json Web Token Authentication, use:
 ![Image description](LocalDB/diagram.png)
 
 ## Requests
-* Get new token
+* Get a new token
 * Check if existing token is valid
 * Create a new user
+* TODO: Get the user
+* TODO: Update the user
+* TODO: Delete the user
 
 ## Request examples:
 
@@ -20,7 +23,7 @@ Microservice Json Web Token Authentication, use:
 
 Method Get:
 ```console
-http://localhost:30796/api/token/get?username=test1&password=123456
+/api/token/get?username=test1&password=123456
 
 Response:
 {
@@ -33,7 +36,7 @@ Response:
 
 Method Get:
 ```console
-http://localhost:30796/api/token/is-valid?Token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOjEsIm5iZiI6MTU4OTQ0MDYxNCwiZXhwIjoxNTg5NDc2NTE1LCJpYXQiOjE1ODk0NDA1MTUsImlzcyI6IllCQl9Kc29uV2ViVG9rZW5TZXJ2ZXIiLCJhdWQiOiJodHRwczovL3Rlc3R3aXpkaWFwaS5henVyZXdlYnNpdGVzLm5ldCJ9.YWYLiPCdZD936w6Ny4oRPMewswAYcUnhUUGve0YuRTQ
+/api/token/is-valid?Token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOjEsIm5iZiI6MTU4OTQ0MDYxNCwiZXhwIjoxNTg5NDc2NTE1LCJpYXQiOjE1ODk0NDA1MTUsImlzcyI6IllCQl9Kc29uV2ViVG9rZW5TZXJ2ZXIiLCJhdWQiOiJodHRwczovL3Rlc3R3aXpkaWFwaS5henVyZXdlYnNpdGVzLm5ldCJ9.YWYLiPCdZD936w6Ny4oRPMewswAYcUnhUUGve0YuRTQ
 
 Response:
 {
@@ -45,7 +48,7 @@ Response:
 
 Method Put:
 ```console
-http://localhost:30796/api/user/create
+/api/user/create
 
 Body Request:
 {
@@ -61,8 +64,8 @@ Body Request:
 "Phone": "054111111",
 "Comments": "com",
 "UserFields": [
-	{"FieldTypeName":"childs", "FieldData":"3"},
-	{"FieldTypeName":"WifeName", "FieldData":"Elina"}
+	{"FieldType": "number", "FieldName":"childs", "FieldData":"3"},
+	{"FieldType": "string", "FieldName":"Name", "FieldData":"Elina"}
 ],
 "UserRoles": [
 	{"UserRoleId":1}, 
@@ -129,10 +132,9 @@ Response:
 ```
 
 ## Better implementation 
-As we know, each mecroservice must implement one bussiness task. That why in better way we can split that microservice:
-* Token service
-* User service
-
+Each microservice must implement one bussiness task. That why in better way we can split that microservice:
+* Token microservice
+* User microservice
 
 ## Resources
 For documentation and instructions check out http://jasonwatmore.com/post/2018/08/14/aspnet-core-21-jwt-authentication-tutorial-with-example-api

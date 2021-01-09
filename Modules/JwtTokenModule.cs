@@ -11,14 +11,16 @@ using JWT.Auth.Helpers;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using JWT.Auth.Models.Enums;
-using JWT.Auth.Entities;
 using JWT.Auth.Modules.Interafaces;
+using JWT.Auth.Entities.Context;
 
 namespace JwtWebTokenSerice.Modules
 {
     public class JwtTokenModule : IJwtTokenValidator
     {
         #region Properties
+        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         readonly AppSettings appSettings;
 
         long userId;
@@ -82,32 +84,16 @@ namespace JwtWebTokenSerice.Modules
 
         private async Task<Token> GetToken()
         {
-            try
-            {
-                return await context.Token.OrderByDescending(x => x.ExpirationDate)
-                                          .FirstOrDefaultAsync(x => x.TokenKey == token.TokenKey && 
+            return await context.Token.OrderByDescending(x => x.ExpirationDate)
+                                          .FirstOrDefaultAsync(x => x.TokenKey == token.TokenKey &&
                                                                     x.DeletedDate == null);
-            }
-            catch (Exception ex)
-            {
-                // TODO: log
-                throw ex;
-            }
         }
 
         private async Task<Token> GetTokenByUserId(bool IsForceNew)
         {
-            try
-            {
-                return await context.Token.OrderByDescending(x => x.ExpirationDate)
+            return await context.Token.OrderByDescending(x => x.ExpirationDate)
                                       .FirstOrDefaultAsync(x => x.UserId == userId &&
                                                                 x.ExpirationDate >= DateTime.UtcNow);
-            }
-            catch (Exception ex)
-            {
-                // TODO: log
-                throw ex;
-            }            
         }
 
         private void SetTokenData(string BrowserCapabilities, string IpAddress, string hostUrl)

@@ -15,10 +15,9 @@ namespace JWT.Auth.Configuration
         {
             CreateMap<CreateUserRequest, User>().ForMember(dest => dest.UserUserRole,
                                             y => y.Ignore());
-                //.ForMember(dest => dest.ApplicationId,
-                //                            y => y.MapFrom(x => (int)x.Application))
-                //                                .ForMember(dest => dest.Application,
-                //                            y => y.Ignore());
+
+            CreateMap<UpdateUserRequest, User>().ForMember(dest => dest.UserUserRole,
+                                            y => y.Ignore());
         }
     }
 }
