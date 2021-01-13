@@ -13,17 +13,20 @@ using Microsoft.EntityFrameworkCore;
 using JWT.Auth.Models.Enums;
 using JWT.Auth.Modules.Interafaces;
 using JWT.Auth.Entities.Context;
+using Newtonsoft.Json;
+using JWT_Auth.Microservice.Modules.Interafaces;
+using JWT.Auth.Models.Requests;
+using Microsoft.Extensions.Configuration;
 
 namespace JwtWebTokenSerice.Modules
 {
-    public class JwtTokenModule : IJwtTokenValidator
+    public class JwtTokenModule : IJwtTokenModule, IJwtTokenValidator
     {
         #region Properties
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-        readonly AppSettings appSettings;
-
-        long userId;
+        
+        IConfiguration configuration;
+        User user;
         IEnumerable<string> userRoles;
         JWTAuthContext context;
         JWT.Auth.Entities.Token token;
@@ -35,36 +38,35 @@ namespace JwtWebTokenSerice.Modules
         #endregion
 
         #region Constructors
-        public JwtTokenModule(string TokenKey, JWTAuthContext Context)
+        public JwtTokenModule(JWTAuthContext Context, IConfiguration Configuration)
         {
-            token = new JWT.Auth.Entities.Token();
-            token.TokenKey = TokenKey;
             context = Context;
-        }
-
-        public JwtTokenModule(long UserId, IEnumerable<string> UserRoles,
-                              JWTAuthContext Context,
-                              IOptions<AppSettings> AppSettings)
-        {            
-            userId = UserId;
-            userRoles = UserRoles;
-            context = Context;
-
-            appSettings = AppSettings.Value;
+            configuration = Configuration;
         }
         #endregion
 
-        #region Methods
-        public async Task<string> GetToken(string BrowserCapabilities, string IpAdderess, string HostUrl, bool IsGenerateNewToken = false)
+
+        #region Public Methods
+        public async Task<string> GetToken(UserTokenRequest UserParam)
         {
-            if (!IsGenerateNewToken)
+            user = await context.User.Include(x => x.UserUserRole)
+                                         .ThenInclude(x => x.UserRole)
+                                         .FirstOrDefaultAsync(x => x.Username == UserParam.Username &&
+                                                                   x.Password == UserParam.Password);
+
+            if (user == null)
+                throw new Exception("Username or password is incorrect");
+
+            userRoles = user.UserUserRole.Select(x => x.UserRole.Name);
+
+            if (!UserParam.IsGenerateNewToken)
             {
-                token = await GetTokenByUserId(IsGenerateNewToken);
+                token = await GetTokenByUserId(UserParam.IsGenerateNewToken);
             }
 
             if (token == null)
             {
-                SetTokenData(BrowserCapabilities, IpAdderess, HostUrl);
+                SetTokenData(UserParam.BrowserCapabilities, UserParam.IpAdderess, UserParam.HostUrl);
 
                 token.TokenKey = GenerateNewToken();
 
@@ -75,14 +77,17 @@ namespace JwtWebTokenSerice.Modules
             return token.TokenKey;
         }
 
-        public async Task<bool> IsTokenValid()
+        public async Task<bool> IsTokenValid(string TokenKey)
         {
-            token = await this.GetToken();
+            token = await this.GetToken(TokenKey);
 
             return (token != null && token.ExpirationDate > DateTime.UtcNow) ? true : false;
-        }
+        } 
+        #endregion
 
-        private async Task<Token> GetToken()
+        #region Private Methods       
+
+        private async Task<Token> GetToken(string TokenKey)
         {
             return await context.Token.OrderByDescending(x => x.ExpirationDate)
                                           .FirstOrDefaultAsync(x => x.TokenKey == token.TokenKey &&
@@ -92,7 +97,7 @@ namespace JwtWebTokenSerice.Modules
         private async Task<Token> GetTokenByUserId(bool IsForceNew)
         {
             return await context.Token.OrderByDescending(x => x.ExpirationDate)
-                                      .FirstOrDefaultAsync(x => x.UserId == userId &&
+                                      .FirstOrDefaultAsync(x => x.UserId == user.Id &&
                                                                 x.ExpirationDate >= DateTime.UtcNow);
         }
 
@@ -102,18 +107,21 @@ namespace JwtWebTokenSerice.Modules
             token.BrowserCapabilities = BrowserCapabilities;
             token.Ip = IpAddress;
             token.CreatedDate = DateTime.UtcNow;
-            token.ExpirationDate = DateTime.UtcNow.AddHours(appSettings.ExpireAfterHours);
+            token.ExpirationDate = DateTime.UtcNow.AddHours(double.Parse(configuration.GetSection("AppSettings:ExpireAfterHours").Value));
             token.SecurityTypeId = (byte)SecurityTypes.HmacSha256;
             token.SystemName = hostUrl;
-            token.UserId = userId;
-            token.Issuer = appSettings.Issuer;
-            token.Audience = appSettings.Audience;
+            token.UserId = user.Id;
+            token.Issuer = configuration.GetSection("AppSettings:Issuer").Value;
+            token.Audience = configuration.GetSection("AppSettings:Audience").Value;            
         }
 
         private string GenerateNewToken()
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(appSettings.Secret);
+            var key = Encoding.UTF8.GetBytes(configuration.GetSection("AppSettings:Secret").Value);
+            var userUserRole = JsonConvert.SerializeObject(user.UserUserRole, 
+                                    new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Audience = token.Audience,
@@ -121,14 +129,17 @@ namespace JwtWebTokenSerice.Modules
                 Issuer = token.Issuer,
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, token.UserId.ToString(), ClaimValueTypes.Integer),                 
+                    new Claim(ClaimTypes.Email, user.Email, ClaimValueTypes.String),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString(), ClaimValueTypes.Integer),
+                    new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}", ClaimValueTypes.String),                                        
+                    new Claim(ClaimTypes.Role, userUserRole, ClaimValueTypes.String),
                 }),
                 Expires = token.ExpirationDate,
                 IssuedAt = token.CreatedDate,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
-            foreach (var UserUserRole in token.User.UserUserRole)
+            foreach (var UserUserRole in user.UserUserRole)
             {
                 tokenDescriptor.Subject.AddClaim(new Claim(ClaimTypes.Role, UserUserRole.UserRole.ToString(), ClaimValueTypes.String));
             }            

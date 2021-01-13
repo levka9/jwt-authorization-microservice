@@ -9,6 +9,7 @@ using System.Linq;
 using JWT.Auth.Modules.Interafaces;
 using Microsoft.AspNetCore.Cors;
 using JWT.Auth.Entities.Context;
+using JWT_Auth.Microservice.Modules.Interafaces;
 
 namespace JwtWebTokenSerice.Controllers
 {        
@@ -17,16 +18,16 @@ namespace JwtWebTokenSerice.Controllers
     public class TokenController : ControllerBase
     {
         #region Properties
-        JWTAuthContext context;
-        IOptions<AppSettings> appSettings;
+        IJwtTokenModule jwtTokenModule;
+        IJwtTokenValidator jwtTokenValidator;
         #endregion
 
         #region Constructors
-        public TokenController(JWTAuthContext Context,
-                               IOptions<AppSettings> AppSettings)
+        public TokenController(IJwtTokenModule JwtTokenModule,
+                               IJwtTokenValidator JwtTokenValidator)
         {
-            context = Context;
-            appSettings = AppSettings;
+            jwtTokenModule = JwtTokenModule;
+            jwtTokenValidator = JwtTokenValidator;
         }
         #endregion
 
@@ -34,22 +35,11 @@ namespace JwtWebTokenSerice.Controllers
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery]UserTokenRequest UserParam)
         {
-            var browserCapabilities = HttpContext.Request.Headers["User-Agent"].ToString();
-            var ipAdderess = HttpContext.Connection.RemoteIpAddress;
-            var hostUrl = HttpContext.Request.Host.ToString();
+            UserParam.BrowserCapabilities = HttpContext.Request.Headers["User-Agent"].ToString();
+            UserParam.IpAdderess = HttpContext.Connection.RemoteIpAddress.ToString();
+            UserParam.HostUrl = HttpContext.Request.Host.ToString();
 
-            var user = await context.User.Include(x => x.UserUserRole)
-                                         .ThenInclude(x => x.UserRole)
-                                         .FirstOrDefaultAsync(x => x.Username == UserParam.Username &&
-                                                                   x.Password == UserParam.Password);
-
-            if (user == null)
-                return BadRequest(new { message = "Username or password is incorrect" });
-
-            var userRoles = user.UserUserRole.Select(x => x.UserRole.Name);
-
-            var jwtTokenModule = new JwtTokenModule(user.Id, userRoles, context, appSettings);
-            var token = await jwtTokenModule.GetToken(browserCapabilities, ipAdderess.ToString(), hostUrl, UserParam.IsGenerateNewToken);
+            var token = await jwtTokenModule.GetToken(UserParam);
 
             return Ok(new { token_type = "Bearer", access_token = token });
         }
@@ -58,8 +48,7 @@ namespace JwtWebTokenSerice.Controllers
         [ActionName("is-valid")]
         public async Task<IActionResult> IsTokenValid([FromQuery]string Token)
         {
-            IJwtTokenValidator jwtTokenValidator = new JwtTokenModule(Token, context);
-            var result = await jwtTokenValidator.IsTokenValid();
+            var result = await jwtTokenValidator.IsTokenValid(Token);
 
             if (result)
             {

@@ -17,6 +17,11 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using JWT.Auth.Modules;
 using Microsoft.EntityFrameworkCore;
+using JwtWebTokenSerice.Modules;
+using JWT_Auth.Microservice.Modules.Interafaces;
+using Microsoft.Extensions.Options;
+using JWT.Auth.Helpers;
+using System.Text.Json;
 
 namespace JWT_Auth.Microservice
 {
@@ -73,15 +78,17 @@ namespace JWT_Auth.Microservice
             //            };
             //        }); 
             #endregion
-
+            
             services.AddControllers()
-                    .AddNewtonsoftJson(o =>
+                    .AddNewtonsoftJson(options =>
                     {
-                        o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                     });
 
             // configure DI for application services            
             services.AddScoped<IUserModule, UserModule>();
+            services.AddScoped<IJwtTokenValidator, JwtTokenModule>();
+            services.AddScoped<IJwtTokenModule, JwtTokenModule>();            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

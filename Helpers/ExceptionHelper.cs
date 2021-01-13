@@ -7,13 +7,16 @@ namespace JWT.Auth.Helpers
 {
     public static class ExceptionHelper
     {        
-        public static string GetInnerExceptions(this Exception ex, string msgs = "")
+        public static string GetInnerExceptions(Exception Exception, string Message = "", bool IsFile = false)
         {
-            if (ex == null) return string.Empty;
-            if (msgs == "") msgs = ex.Message;
-            if (ex.InnerException != null)
-                msgs += "\r\nInnerException: " + ExceptionHelper.GetInnerExceptions(ex.InnerException);
-            return msgs;
+            if (Exception == null) return Message;
+
+            var breakLine = (IsFile) ? "\\r\\n" : string.Empty;
+
+            var message = string.IsNullOrEmpty(Message) ? Exception.Message
+                                                        : $"{Message}{breakLine} {Exception.Message}";
+
+            return GetInnerExceptions(Exception.InnerException, message, IsFile);
         }
     }
 }
