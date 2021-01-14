@@ -96,6 +96,15 @@ namespace JWT.Auth.Modules
                                      .FirstOrDefaultAsync(x => x.Username == Request.Username &&
                                                                x.Password == Request.Password);
         }
+        
+        public async Task UpdatePasswordAsync(long? UserId, string Password)
+        {
+            var user = await this.Get(UserId);
+            
+            user.Password = Password;
+
+            await context.SaveChangesAsync();
+        }
 
         public async Task<long> Quantity()
         {

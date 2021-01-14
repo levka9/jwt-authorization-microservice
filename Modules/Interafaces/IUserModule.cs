@@ -12,6 +12,7 @@ namespace JWT.Auth.Modules.Interafaces
     {
         Task<User> AddAsync(CreateUserRequest CreateUserRequest);
         Task<bool> Update(UpdateUserRequest UpdateUserRequest);
+        Task UpdatePasswordAsync(long? UserId, string Password);
         Task<User> Get(long? Id);
         Task<User> GetByCredentials(UserGetByCredentialsRequest Request);
         Task<long> Delete(long? id);

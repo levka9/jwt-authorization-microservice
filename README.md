@@ -284,6 +284,19 @@ Response:
 }
 ```
 
+5. Update user's password:
+
+Method Post:
+```console
+api/user/updatePassword?password=654321
+
+Header:
+authentication: bearer [token]
+
+Response:
+Password updated
+```
+
 ## Better implementation 
 Each microservice must implement one bussiness task. That why in better way we can split that microservice:
 * Token microservice

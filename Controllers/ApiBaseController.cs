@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using JWT_Auth.Microservice.Models.Responses;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,16 @@ namespace JWT.Auth.Controllers
                 result = long.Parse(identifier.Value);
 
             return result;
+        }
+
+        protected IActionResult GetResponse(object Object, string Message = "success", int Status = 200)
+        {
+            return Ok(new BaseHttpResponse() 
+            { 
+                Object = Object, 
+                Message = Message, 
+                Status = Status 
+            });
         }
     }
 }

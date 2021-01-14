@@ -59,6 +59,17 @@ namespace JWT.Auth.Controllers
             return Ok("Web server running.");
         }
 
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> UpdatePassword([FromQuery]string Password)
+        {
+            var userId = base.GetUserIdFromToken();
+
+            await userModule.UpdatePasswordAsync(userId, Password);
+
+            return base.GetResponse(userId);
+        }
+
         [HttpPut]
         public async Task<IActionResult> Create([FromBody]CreateUserRequest User)
         {
