@@ -29,37 +29,15 @@ namespace JWT.Auth.Modules
         #endregion
 
         #region Public Methods
-        public async Task<User> Add(CreateUserRequest CreateUserRequest)
+        public async Task<User> AddAsync(CreateUserRequest CreateUserRequest)
         {
-            var user = mapper.Map<CreateUserRequest, User>(CreateUserRequest);
+            var user = MapUserData(CreateUserRequest);
+            
+            AddRoles(user, CreateUserRequest);
 
-            user.IsActive = true;
-            user.LastPasswordChangedDate = DateTime.UtcNow;
-            user.CreateDate = DateTime.UtcNow;
+            AddUserFields(user, CreateUserRequest);
 
             await context.User.AddAsync(user);
-            await context.SaveChangesAsync();
-
-            foreach (var userUserRole in CreateUserRequest.UserRoles)
-            {
-                user.UserUserRole.Add(new UserUserRole()
-                {
-                    UserId = user.Id,
-                    UserRoleId = userUserRole.UserRoleId
-                });
-            }
-
-            foreach (var userFields in CreateUserRequest.UserFields)
-            {
-                user.UserField.Add(new UserField()
-                {
-                    FieldType = userFields.FieldType,
-                    FieldName = userFields.FieldName,
-                    FieldData = userFields.FieldData
-                });
-            }
-
-            context.User.Update(user);
             await context.SaveChangesAsync();
 
             return user;
@@ -121,6 +99,42 @@ namespace JWT.Auth.Modules
         #endregion
 
         #region Private Methods
+        private User MapUserData(CreateUserRequest Request)
+        {
+            var user = mapper.Map<CreateUserRequest, User>(Request);
+
+            user.IsActive = true;
+            user.LastPasswordChangedDate = DateTime.UtcNow;
+            user.CreateDate = DateTime.UtcNow;
+
+            return user;
+        }
+
+        private void AddRoles(User User, CreateUserRequest Request)
+        {
+            foreach (var userUserRole in Request.UserRoles)
+            {
+                User.UserUserRole.Add(new UserUserRole()
+                {
+                    UserId = User.Id,
+                    UserRoleId = userUserRole.UserRoleId,
+                });
+            }
+        }
+
+        private void AddUserFields(User User, CreateUserRequest Request)
+        {
+            foreach (var userFields in Request.UserFields)
+            {
+                User.UserField.Add(new UserField()
+                {
+                    FieldType = userFields.FieldType,
+                    FieldName = userFields.FieldName,
+                    FieldData = userFields.FieldData
+                });
+            }
+        }
+
         private void ValidateIfUserFound(User user)
         {
             if (user == null)

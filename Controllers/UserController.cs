@@ -53,7 +53,7 @@ namespace JWT.Auth.Controllers
         [HttpPut]
         public async Task<IActionResult> Create([FromBody]CreateUserRequest User)
         {
-            var response = await userModule.Add(User);
+            var response = await userModule.AddAsync(User);
 
             return Ok(response);
         }
