@@ -294,7 +294,11 @@ Header:
 authentication: bearer [token]
 
 Response:
-Password updated
+{
+    "status": 200,
+    "message": "success",
+    "object": 1
+}
 ```
 
 ## Better implementation 
