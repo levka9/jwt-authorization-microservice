@@ -26,10 +26,12 @@ namespace JwtWebTokenSerice.Modules
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         
         IConfiguration configuration;
-        User user;
-        IEnumerable<string> userRoles;
-        JWTAuthContext context;
+        IEnumerable<string> lstUserRoles;        
         JWT.Auth.Entities.Token token;
+
+        User user;
+        IUserModule userModule;
+        JWTAuthContext context;
 
         public JWT.Auth.Entities.Token Token 
         {
@@ -38,8 +40,9 @@ namespace JwtWebTokenSerice.Modules
         #endregion
 
         #region Constructors
-        public JwtTokenModule(JWTAuthContext Context, IConfiguration Configuration)
+        public JwtTokenModule(IUserModule UserModule, JWTAuthContext Context, IConfiguration Configuration)
         {
+            userModule = UserModule;
             context = Context;
             configuration = Configuration;
         }
@@ -49,29 +52,20 @@ namespace JwtWebTokenSerice.Modules
         #region Public Methods
         public async Task<string> GetToken(UserTokenRequest UserParam)
         {
-            user = await context.User.Include(x => x.UserUserRole)
-                                         .ThenInclude(x => x.UserRole)
-                                         .FirstOrDefaultAsync(x => x.Username == UserParam.Username &&
-                                                                   x.Password == UserParam.Password);
+            
+            user = await userModule.GetByCredentials(UserParam.Username, UserParam.Password);
 
             if (user == null)
                 throw new Exception("Username or password is incorrect");
 
-            userRoles = user.UserUserRole.Select(x => x.UserRole.Name);
-
             if (!UserParam.IsGenerateNewToken)
             {
-                token = await GetTokenByUserId(UserParam.IsGenerateNewToken);
+                token = await GetTokenByUserId();
             }
 
             if (token == null)
             {
-                SetTokenData(UserParam.BrowserCapabilities, UserParam.IpAdderess, UserParam.HostUrl);
-
-                token.TokenKey = GenerateNewToken();
-
-                await context.Token.AddAsync(token);
-                await context.SaveChangesAsync();
+                await CreateNewToken(UserParam);
             }
 
             return token.TokenKey;
@@ -90,15 +84,25 @@ namespace JwtWebTokenSerice.Modules
         private async Task<Token> GetToken(string TokenKey)
         {
             return await context.Token.OrderByDescending(x => x.ExpirationDate)
-                                          .FirstOrDefaultAsync(x => x.TokenKey == token.TokenKey &&
-                                                                    x.DeletedDate == null);
+                                      .FirstOrDefaultAsync(x => x.TokenKey == token.TokenKey &&
+                                                                x.DeletedDate == null);
         }
 
-        private async Task<Token> GetTokenByUserId(bool IsForceNew)
+        private async Task<Token> GetTokenByUserId()
         {
             return await context.Token.OrderByDescending(x => x.ExpirationDate)
                                       .FirstOrDefaultAsync(x => x.UserId == user.Id &&
                                                                 x.ExpirationDate >= DateTime.UtcNow);
+        }
+
+        private async Task CreateNewToken(UserTokenRequest UserParam)
+        {
+            SetTokenData(UserParam.BrowserCapabilities, UserParam.IpAdderess, UserParam.HostUrl);
+
+            token.TokenKey = GenerateNewToken();
+
+            await context.Token.AddAsync(token);
+            await context.SaveChangesAsync();
         }
 
         private void SetTokenData(string BrowserCapabilities, string IpAddress, string hostUrl)
@@ -119,8 +123,11 @@ namespace JwtWebTokenSerice.Modules
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(configuration.GetSection("AppSettings:Secret").Value);
-            var userUserRole = JsonConvert.SerializeObject(user.UserUserRole, 
+            
+            lstUserRoles = user.UserUserRole.Select(x => x.UserRole.Name);
+            var userRoles = JsonConvert.SerializeObject(lstUserRoles, 
                                     new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
+            
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -132,16 +139,16 @@ namespace JwtWebTokenSerice.Modules
                     new Claim(ClaimTypes.Email, user.Email, ClaimValueTypes.String),
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString(), ClaimValueTypes.Integer),
                     new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}", ClaimValueTypes.String),                                        
-                    new Claim(ClaimTypes.Role, userUserRole, ClaimValueTypes.String),
+                    new Claim(ClaimTypes.Role, userRoles, ClaimValueTypes.String),
                 }),
                 Expires = token.ExpirationDate,
                 IssuedAt = token.CreatedDate,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
-            foreach (var UserUserRole in user.UserUserRole)
+            foreach (var userRole in lstUserRoles)
             {
-                tokenDescriptor.Subject.AddClaim(new Claim(ClaimTypes.Role, UserUserRole.UserRole.ToString(), ClaimValueTypes.String));
+                tokenDescriptor.Subject.AddClaim(new Claim(ClaimTypes.Role, userRole, ClaimValueTypes.String));
             }            
 
             var securedToken = tokenHandler.CreateToken(tokenDescriptor);

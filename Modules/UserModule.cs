@@ -101,6 +101,16 @@ namespace JWT.Auth.Modules
             return user.Id;
         }
 
+        public async Task<User> GetByCredentials(string Username, string Password)
+        {
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+                throw new ArgumentNullException("Username or Password are empty.");
+
+            return await context.User.Include(x => x.UserUserRole).ThenInclude(x => x.UserRole)
+                                     .FirstOrDefaultAsync(x => x.Username == Username &&
+                                                               x.Password == Password);
+        }
+
         public async Task<long> Quantity()
         {
             return await context.Set<User>()
