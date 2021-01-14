@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using JWT.Auth.Entities.Context;
 using JWT.Auth.Modules.Interafaces;
+using JWT_Auth.Microservice.Models.Requests;
 
 namespace JWT.Auth.Modules
 {
@@ -31,6 +32,8 @@ namespace JWT.Auth.Modules
         #region Public Methods
         public async Task<User> AddAsync(CreateUserRequest CreateUserRequest)
         {
+            await ValidateUserNotExists(CreateUserRequest.Username, (int)CreateUserRequest.ApplicationId);
+
             var user = MapUserData(CreateUserRequest);
             
             AddRoles(user, CreateUserRequest);
@@ -55,9 +58,12 @@ namespace JWT.Auth.Modules
 
         public async Task<User> Get(long? Id)
         {
-            if (Id == null) throw new NullReferenceException("Parameter Id is null.");
+            if (Id == null) throw new ArgumentNullException("Parameter Id is null.");
 
-            var user = await context.User.FirstOrDefaultAsync(x => x.Id == Id);
+            var user = await context.User.Include(x => x.Application)
+                                         .Include(x => x.UserUserRole).ThenInclude(x => x.UserRole)
+                                         .Include(x => x.UserField)
+                                         .FirstOrDefaultAsync(x => x.Id == Id);
             user.Password = string.Empty;
 
             ValidateIfUserFound(user);
@@ -79,14 +85,16 @@ namespace JWT.Auth.Modules
             return user.Id;
         }
 
-        public async Task<User> GetByCredentials(string Username, string Password)
+        public async Task<User> GetByCredentials(UserGetByCredentialsRequest Request)
         {
-            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+            if (string.IsNullOrWhiteSpace(Request.Username) || string.IsNullOrWhiteSpace(Request.Password))
                 throw new ArgumentNullException("Username or Password are empty.");
 
-            return await context.User.Include(x => x.UserUserRole).ThenInclude(x => x.UserRole)
-                                     .FirstOrDefaultAsync(x => x.Username == Username &&
-                                                               x.Password == Password);
+            return await context.User.Include(x => x.Application)
+                                     .Include(x => x.UserUserRole).ThenInclude(x => x.UserRole)
+                                     .Include(x => x.UserField)
+                                     .FirstOrDefaultAsync(x => x.Username == Request.Username &&
+                                                               x.Password == Request.Password);
         }
 
         public async Task<long> Quantity()
@@ -99,10 +107,18 @@ namespace JWT.Auth.Modules
         #endregion
 
         #region Private Methods
+        private async Task ValidateUserNotExists(string Username, int ApplicationId)
+        {
+            var user = await context.User.FirstOrDefaultAsync(x => x.Username == Username &&
+                                                                   x.ApplicationId == ApplicationId);
+            if (user != null)
+                throw new ArgumentOutOfRangeException("Username already exists");
+        }
+
         private User MapUserData(CreateUserRequest Request)
         {
             var user = mapper.Map<CreateUserRequest, User>(Request);
-
+            
             user.IsActive = true;
             user.LastPasswordChangedDate = DateTime.UtcNow;
             user.CreateDate = DateTime.UtcNow;

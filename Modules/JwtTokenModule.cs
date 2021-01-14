@@ -17,6 +17,7 @@ using Newtonsoft.Json;
 using JWT_Auth.Microservice.Modules.Interafaces;
 using JWT.Auth.Models.Requests;
 using Microsoft.Extensions.Configuration;
+using JWT_Auth.Microservice.Models.Requests;
 
 namespace JwtWebTokenSerice.Modules
 {
@@ -53,7 +54,11 @@ namespace JwtWebTokenSerice.Modules
         public async Task<string> GetToken(UserTokenRequest UserParam)
         {
             
-            user = await userModule.GetByCredentials(UserParam.Username, UserParam.Password);
+            user = await userModule.GetByCredentials(new UserGetByCredentialsRequest() 
+                                                    { 
+                                                        Password = UserParam.Password, 
+                                                        Username = UserParam.Username
+                                                    });
 
             if (user == null)
                 throw new Exception("Username or password is incorrect");

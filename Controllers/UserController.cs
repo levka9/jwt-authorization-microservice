@@ -8,6 +8,7 @@ using JWT.Auth.Entities.Context;
 using JWT.Auth.Models.Requests;
 using JWT.Auth.Modules;
 using JWT.Auth.Modules.Interafaces;
+using JWT_Auth.Microservice.Models.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -32,6 +33,14 @@ namespace JWT.Auth.Controllers
             long? userId = GetUserIdFromToken();
 
             var user = await userModule.Get(userId);
+
+            return Ok(user);
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> GetByCredentials([FromQuery]UserGetByCredentialsRequest Request)
+        {
+            var user = await userModule.GetByCredentials(Request);
 
             return Ok(user);
         }

@@ -131,6 +131,159 @@ Response:
 }
 ```
 
+4. Get a user by token:
+
+Method Get:
+```console
+44345/api/user/get
+
+Header:
+authorization: bearer [token]
+
+Response:
+{
+    "id": 1,
+    "applicationId": 1,
+    "firstName": "Test1",
+    "middleName": null,
+    "lastName": null,
+    "passportIdentity": null,
+    "picturePath": null,
+    "email": "test@test.com",
+    "username": "test1",
+    "password": "",
+    "mobile": null,
+    "phone": null,
+    "birthdate": null,
+    "isApproved": true,
+    "isLocked": false,
+    "isActive": true,
+    "lastPasswordChangedDate": "2020-05-13T17:17:02.12",
+    "failedPasswordAttemptCount": 0,
+    "comments": null,
+    "createDate": "2020-05-13T17:17:02.12",
+    "application": null,
+    "token": [],
+    "userField": [],
+    "userUserRole": [
+        {
+            "id": 1,
+            "userId": 1,
+            "userRoleId": 1,
+            "createDate": "2020-05-14T10:32:15.71",
+            "userRole": {
+                "id": 1,
+                "name": "Admin",
+                "description": null,
+                "createDate": "2020-05-14T10:31:28.237",
+                "userUserRole": []
+            }
+        },
+        {
+            "id": 2,
+            "userId": 1,
+            "userRoleId": 2,
+            "createDate": "2020-05-14T10:32:18.94",
+            "userRole": {
+                "id": 2,
+                "name": "Editor",
+                "description": null,
+                "createDate": "2020-05-14T10:31:33.87",
+                "userUserRole": []
+            }
+        },
+        {
+            "id": 3,
+            "userId": 1,
+            "userRoleId": 3,
+            "createDate": "2020-05-14T10:32:21.457",
+            "userRole": {
+                "id": 3,
+                "name": "Student",
+                "description": null,
+                "createDate": "2020-05-14T10:31:50.35",
+                "userUserRole": []
+            }
+        }
+    ]
+}
+```
+
+5. Get a user by credentials:
+
+Method Get:
+```console
+api/user/GetByCredentials?Username=test1&Password=123456
+
+Response:
+{
+    "id": 1,
+    "applicationId": 1,
+    "firstName": "Test1",
+    "middleName": null,
+    "lastName": null,
+    "passportIdentity": null,
+    "picturePath": null,
+    "email": "test@test.com",
+    "username": "test1",
+    "password": "123456",
+    "mobile": null,
+    "phone": null,
+    "birthdate": null,
+    "isApproved": true,
+    "isLocked": false,
+    "isActive": true,
+    "lastPasswordChangedDate": "2020-05-13T17:17:02.12",
+    "failedPasswordAttemptCount": 0,
+    "comments": null,
+    "createDate": "2020-05-13T17:17:02.12",
+    "application": null,
+    "token": [],
+    "userField": [],
+    "userUserRole": [
+        {
+            "id": 1,
+            "userId": 1,
+            "userRoleId": 1,
+            "createDate": "2020-05-14T10:32:15.71",
+            "userRole": {
+                "id": 1,
+                "name": "Admin",
+                "description": null,
+                "createDate": "2020-05-14T10:31:28.237",
+                "userUserRole": []
+            }
+        },
+        {
+            "id": 2,
+            "userId": 1,
+            "userRoleId": 2,
+            "createDate": "2020-05-14T10:32:18.94",
+            "userRole": {
+                "id": 2,
+                "name": "Editor",
+                "description": null,
+                "createDate": "2020-05-14T10:31:33.87",
+                "userUserRole": []
+            }
+        },
+        {
+            "id": 3,
+            "userId": 1,
+            "userRoleId": 3,
+            "createDate": "2020-05-14T10:32:21.457",
+            "userRole": {
+                "id": 3,
+                "name": "Student",
+                "description": null,
+                "createDate": "2020-05-14T10:31:50.35",
+                "userUserRole": []
+            }
+        }
+    ]
+}
+```
+
 ## Better implementation 
 Each microservice must implement one bussiness task. That why in better way we can split that microservice:
 * Token microservice

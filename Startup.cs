@@ -22,6 +22,9 @@ using JWT_Auth.Microservice.Modules.Interafaces;
 using Microsoft.Extensions.Options;
 using JWT.Auth.Helpers;
 using System.Text.Json;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 namespace JWT_Auth.Microservice
 {
@@ -55,30 +58,30 @@ namespace JWT_Auth.Microservice
             services.AddAutoMapper(typeof(Startup));
 
             #region Authentication
-            //var appSettingsSection = Configuration.GetSection("AppSettings");
-            //services.Configure<AppSettings>(appSettingsSection);
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
 
-            // configure jwt authentication
-            //var appSettings = appSettingsSection.Get<AppSettings>();
-            //var key = Encoding.UTF8.GetBytes(appSettings.Secret);
+            //configure jwt authorize
+            var appSettings = appSettingsSection.Get<AppSettings>();
+            var key = Encoding.UTF8.GetBytes(appSettings.Secret);
 
-            //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            //        .AddJwtBearer(x =>
-            //        {
-            //            x.RequireHttpsMetadata = false;
-            //            x.SaveToken = true;                        
-            //            x.TokenValidationParameters = new TokenValidationParameters
-            //            {                            
-            //                ValidateIssuerSigningKey = true,
-            //                IssuerSigningKey = new SymmetricSecurityKey(key),
-            //                ValidateIssuer = true,
-            //                ValidateAudience = true,
-            //                ValidIssuer = "http://localhost:4000",
-            //                ValidAudience = "http://localhost:30778"
-            //            };
-            //        }); 
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(x =>
+                    {
+                        x.RequireHttpsMetadata = false;
+                        x.SaveToken = true;
+                        x.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = new SymmetricSecurityKey(key),
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidIssuer = appSettings.Issuer,
+                            ValidAudience = appSettings.Audience
+                        };
+                    });
             #endregion
-            
+
             services.AddControllers()
                     .AddNewtonsoftJson(options =>
                     {
