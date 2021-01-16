@@ -48,10 +48,7 @@ namespace JWT_Auth.Microservice
         public void ConfigureServices(IServiceCollection services)
         {
             AddConnectionStrings(ref services);
-                        
-            var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
-            XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
-
+            
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
@@ -117,6 +114,9 @@ namespace JWT_Auth.Microservice
             }
 
             app.ConfigureExceptionHandler();
+
+            var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+            XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
 
             app.UseHttpsRedirection();
 
