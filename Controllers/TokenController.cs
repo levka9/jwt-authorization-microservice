@@ -37,7 +37,7 @@ namespace JwtWebTokenSerice.Controllers
 
             var token = await jwtTokenModule.GetToken(UserParam);
 
-            return Ok(new { token_type = "Bearer", access_token = token });
+            return Ok(new { tokenType = "Bearer", accessToken = token });
         }
 
         [HttpGet]

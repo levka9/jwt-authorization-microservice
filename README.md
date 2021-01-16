@@ -27,8 +27,8 @@ Method Get:
 
 Response:
 {
-    "token_type": "Bearer",
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOjEsIm5iZiI6MTU4OTQ0MDYxNCwiZXhwIjoxNTg5NDc2NTE1LCJpYXQiOjE1ODk0NDA1MTUsImlzcyI6IllCQl9Kc29uV2ViVG9rZW5TZXJ2ZXIiLCJhdWQiOiJodHRwczovL3Rlc3R3aXpkaWFwaS5henVyZXdlYnNpdGVzLm5ldCJ9.YWYLiPCdZD936w6Ny4oRPMewswAYcUnhUUGve0YuRTQ"
+    "tokenType": "Bearer",
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOjEsIm5iZiI6MTU4OTQ0MDYxNCwiZXhwIjoxNTg5NDc2NTE1LCJpYXQiOjE1ODk0NDA1MTUsImlzcyI6IllCQl9Kc29uV2ViVG9rZW5TZXJ2ZXIiLCJhdWQiOiJodHRwczovL3Rlc3R3aXpkaWFwaS5henVyZXdlYnNpdGVzLm5ldCJ9.YWYLiPCdZD936w6Ny4oRPMewswAYcUnhUUGve0YuRTQ"
 }
 ```
 
