@@ -284,7 +284,7 @@ Response:
 }
 ```
 
-5. Update user's password:
+6. Update user's password:
 
 Method Post:
 ```console

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace JWT.Auth.Entities
+namespace JWT_Auth.Microservice.Entities
 {
     public partial class SecurityType
     {

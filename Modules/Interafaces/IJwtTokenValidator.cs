@@ -7,7 +7,7 @@ namespace JWT_Auth.Microservice.Modules.Interafaces
 {
     public interface IJwtTokenValidator
     {
-        JWT.Auth.Entities.Token Token { get; }
+        JWT_Auth.Microservice.Entities.Token Token { get; }
         Task<bool> IsTokenValid(string TokenKey);
     }
 }

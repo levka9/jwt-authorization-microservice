@@ -1,5 +1,5 @@
 using AutoMapper;
-using JWT.Auth.Entities.Context;
+using JWT_Auth.Microservice.Entities.Context;
 using JWT.Auth.Extensions;
 using JWT.Auth.Modules.Interafaces;
 using Microsoft.AspNetCore.Builder;
@@ -25,6 +25,9 @@ using System.Text.Json;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using JWT_Auth.Microservice.Modules;
+using FluentEmail.Core.Interfaces;
+using FluentEmail.SendGrid;
 
 namespace JWT_Auth.Microservice
 {
@@ -56,6 +59,9 @@ namespace JWT_Auth.Microservice
             });
 
             services.AddAutoMapper(typeof(Startup));
+
+            services.AddFluentEmail(Configuration.GetSection("SendGrid:SenderDefaultEmail").Value)                    
+                    .AddSendGridSender(Configuration.GetSection("SendGrid:ApiKey").Value);
 
             #region Authentication
             var appSettingsSection = Configuration.GetSection("AppSettings");
@@ -91,7 +97,8 @@ namespace JWT_Auth.Microservice
             // configure DI for application services            
             services.AddScoped<IUserModule, UserModule>();
             services.AddScoped<IJwtTokenValidator, JwtTokenModule>();
-            services.AddScoped<IJwtTokenModule, JwtTokenModule>();            
+            services.AddScoped<IJwtTokenModule, JwtTokenModule>();
+            services.AddScoped<IUserEmailModule, UserEmailModule>();            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

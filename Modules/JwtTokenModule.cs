@@ -6,13 +6,13 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using JWT.Auth.Entities;
+using JWT_Auth.Microservice.Entities;
+using JWT_Auth.Microservice.Entities.Context;
 using JWT.Auth.Helpers;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using JWT.Auth.Models.Enums;
 using JWT.Auth.Modules.Interafaces;
-using JWT.Auth.Entities.Context;
 using Newtonsoft.Json;
 using JWT_Auth.Microservice.Modules.Interafaces;
 using JWT.Auth.Models.Requests;
@@ -28,13 +28,13 @@ namespace JwtWebTokenSerice.Modules
         
         IConfiguration configuration;
         IEnumerable<string> lstUserRoles;        
-        JWT.Auth.Entities.Token token;
+        JWT_Auth.Microservice.Entities.Token token;
 
         User user;
         IUserModule userModule;
         JWTAuthContext context;
 
-        public JWT.Auth.Entities.Token Token 
+        public JWT_Auth.Microservice.Entities.Token Token 
         {
             get { return token; }
         }
@@ -112,7 +112,7 @@ namespace JwtWebTokenSerice.Modules
 
         private void SetTokenData(string BrowserCapabilities, string IpAddress, string hostUrl)
         {
-            token = new JWT.Auth.Entities.Token();
+            token = new JWT_Auth.Microservice.Entities.Token();
             token.BrowserCapabilities = BrowserCapabilities;
             token.Ip = IpAddress;
             token.CreatedDate = DateTime.UtcNow;

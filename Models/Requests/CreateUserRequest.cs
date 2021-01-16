@@ -1,4 +1,4 @@
-﻿using JWT.Auth.Entities;
+﻿using JWT_Auth.Microservice.Entities;
 using JWT.Auth.Models.Enums;
 using System;
 using System.Collections.Generic;

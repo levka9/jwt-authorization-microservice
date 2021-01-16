@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using JWT.Auth.Entities;
+using JWT_Auth.Microservice.Entities;
 
-namespace JWT.Auth.Entities.Context
+namespace JWT_Auth.Microservice.Entities.Context
 {
     public partial class JWTAuthContext : DbContext
     {
@@ -16,10 +16,11 @@ namespace JWT.Auth.Entities.Context
         {
         }
 
-        public virtual DbSet<Applications> Applications { get; set; }
+        public virtual DbSet<Application> Application { get; set; }
         public virtual DbSet<SecurityType> SecurityType { get; set; }
         public virtual DbSet<Token> Token { get; set; }
         public virtual DbSet<User> User { get; set; }
+        public virtual DbSet<UserEmail> UserEmail { get; set; }
         public virtual DbSet<UserField> UserField { get; set; }
         public virtual DbSet<UserRole> UserRole { get; set; }
         public virtual DbSet<UserUserRole> UserUserRole { get; set; }
@@ -35,7 +36,7 @@ namespace JWT.Auth.Entities.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Applications>(entity =>
+            modelBuilder.Entity<Application>(entity =>
             {
                 entity.Property(e => e.CreateDate)
                     .HasColumnType("datetime")
@@ -91,7 +92,6 @@ namespace JWT.Auth.Entities.Context
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Token)
                     .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Token_User");
             });
 
@@ -151,7 +151,12 @@ namespace JWT.Auth.Entities.Context
                     .WithMany(p => p.User)
                     .HasForeignKey(d => d.ApplicationId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_User_Applications");
+                    .HasConstraintName("FK_User_Application");
+            });
+
+            modelBuilder.Entity<UserEmail>(entity =>
+            {
+                entity.Property(e => e.Email).HasMaxLength(50);
             });
 
             modelBuilder.Entity<UserField>(entity =>
@@ -176,7 +181,6 @@ namespace JWT.Auth.Entities.Context
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.UserField)
                     .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_UserField_User");
             });
 
@@ -203,7 +207,6 @@ namespace JWT.Auth.Entities.Context
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.UserUserRole)
                     .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_UserUserRole_User");
 
                 entity.HasOne(d => d.UserRole)

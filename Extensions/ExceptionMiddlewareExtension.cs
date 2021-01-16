@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using System.Diagnostics; // for Demystify
 
 namespace JWT.Auth.Extensions
 {
@@ -27,6 +28,8 @@ namespace JWT.Auth.Extensions
 
                     if (contextFeature != null)
                     {
+                        var exception = contextFeature.Error.Demystify();
+
                         log.Error($"{ExceptionHelper.GetMessages(contextFeature.Error)}");
 
                         await context.Response.WriteAsync(new ErrorDetails()

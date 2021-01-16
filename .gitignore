@@ -47,4 +47,4 @@ obj
 .vs
 .vscode
 .git
-appsettings.json
+appsettings.Development.json

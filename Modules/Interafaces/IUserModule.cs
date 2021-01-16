@@ -1,10 +1,10 @@
-﻿using JWT.Auth.Entities;
-using JWT.Auth.Models.Requests;
+﻿using JWT.Auth.Models.Requests;
 using JWT_Auth.Microservice.Models.Requests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JWT_Auth.Microservice.Entities;
 
 namespace JWT.Auth.Modules.Interafaces
 {

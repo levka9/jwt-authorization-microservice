@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using JWT.Auth.Entities;
+using JWT_Auth.Microservice.Entities;
 using JWT.Auth.Models.Requests;
 using System;
 using System.Collections.Generic;

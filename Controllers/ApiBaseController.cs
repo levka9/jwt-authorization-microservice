@@ -26,7 +26,9 @@ namespace JWT.Auth.Controllers
 
         protected IActionResult GetResponse(object Object, string Message = "success", int Status = 200)
         {
-            return Ok(new BaseHttpResponse() 
+#pragma warning disable CS0436 // Type conflicts with imported type
+            return Ok(new BaseHttpResponse()
+#pragma warning restore CS0436 // Type conflicts with imported type
             { 
                 Object = Object, 
                 Message = Message, 

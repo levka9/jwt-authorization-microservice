@@ -1,14 +1,15 @@
 ﻿using AutoMapper;
-using JWT.Auth.Entities;
+using JWT_Auth.Microservice.Entities;
 using JWT.Auth.Models.Requests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using JWT.Auth.Entities.Context;
+using JWT_Auth.Microservice.Entities.Context;
 using JWT.Auth.Modules.Interafaces;
 using JWT_Auth.Microservice.Models.Requests;
+using JWT_Auth.Microservice.Modules.Interafaces;
 
 namespace JWT.Auth.Modules
 {
@@ -19,13 +20,17 @@ namespace JWT.Auth.Modules
 
         IMapper mapper;
         JWTAuthContext context;
+
+        IUserEmailModule userEmailModule;
         #endregion
 
         #region Constractor
-        public UserModule(JWTAuthContext Context, IMapper Mapper)
+        public UserModule(IUserEmailModule UserEmailModule, JWTAuthContext Context, IMapper Mapper)
         {
             this.mapper = Mapper;
             this.context = Context;
+
+            this.userEmailModule = UserEmailModule;
         }
         #endregion
 
@@ -104,6 +109,8 @@ namespace JWT.Auth.Modules
             user.Password = Password;
 
             await context.SaveChangesAsync();
+
+            await userEmailModule.SendChangedPasswordNotification(user.Email, $"{user.FirstName} {user.LastName}", user.UtcOffset);
         }
 
         public async Task<long> Quantity()
