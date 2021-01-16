@@ -28,6 +28,10 @@ using Microsoft.IdentityModel.Tokens;
 using JWT_Auth.Microservice.Modules;
 using FluentEmail.Core.Interfaces;
 using FluentEmail.SendGrid;
+using log4net;
+using System.Reflection;
+using System.IO;
+using log4net.Config;
 
 namespace JWT_Auth.Microservice
 {
@@ -44,6 +48,9 @@ namespace JWT_Auth.Microservice
         public void ConfigureServices(IServiceCollection services)
         {
             AddConnectionStrings(ref services);
+                        
+            var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+            XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
 
             services.AddCors(options =>
             {
