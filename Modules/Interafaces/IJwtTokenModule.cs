@@ -9,6 +9,7 @@ namespace JWT_Auth.Microservice.Modules.Interafaces
 {
     public interface IJwtTokenModule
     {
+        Task<string> Create(UserTokenRequest UserParam);
         Task<string> GetToken(UserTokenRequest UserParam);
         Task<bool> IsTokenValid(string TokenKey);
     }

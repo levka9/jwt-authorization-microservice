@@ -76,6 +76,13 @@ namespace JwtWebTokenSerice.Modules
             return token.TokenKey;
         }
 
+        public async Task<string> Create(UserTokenRequest UserParam)
+        {
+            await CreateNewToken(UserParam);
+
+            return token.TokenKey;
+        }
+
         public async Task<bool> IsTokenValid(string TokenKey)
         {
             token = await this.GetToken(TokenKey);

@@ -2,7 +2,6 @@
 using JWT_Auth.Microservice.Entities;
 using JWT.Auth.Models.Requests;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +9,7 @@ using JWT_Auth.Microservice.Entities.Context;
 using JWT.Auth.Modules.Interafaces;
 using JWT_Auth.Microservice.Models.Requests;
 using JWT_Auth.Microservice.Modules.Interafaces;
+using Microsoft.AspNetCore.Http;
 
 namespace JWT.Auth.Modules
 {
@@ -21,11 +21,13 @@ namespace JWT.Auth.Modules
         IMapper mapper;
         JWTAuthContext context;
 
-        IUserEmailModule userEmailModule;
+        IUserEmailModule userEmailModule;        
         #endregion
 
         #region Constractor
-        public UserModule(IUserEmailModule UserEmailModule, JWTAuthContext Context, IMapper Mapper)
+        public UserModule(IUserEmailModule UserEmailModule,                         
+                        JWTAuthContext Context, 
+                        IMapper Mapper)
         {
             this.mapper = Mapper;
             this.context = Context;
@@ -51,11 +53,11 @@ namespace JWT.Auth.Modules
             return user;
         }
 
-        public async Task<bool> Update(UpdateUserRequest UpdateUserRequest)
+        public async Task<bool> Update(UpdateUserRequest UpdateUserRequest, long UserId)
         {
             //var userDetails = mapper.Map<User>(UpdateUserRequest);
             
-            var user = await context.User.FirstOrDefaultAsync();
+            var user = await context.User.FirstOrDefaultAsync(x => x.Id == UserId);
             user.IsActive = UpdateUserRequest.IsActive;
 
             return true;
@@ -113,16 +115,41 @@ namespace JWT.Auth.Modules
             await userEmailModule.SendChangedPasswordNotification(user.Email, $"{user.FirstName} {user.LastName}", user.UtcOffset);
         }
 
+
+        public async Task<bool> SendPassword(SendPasswordRequest Request)
+        {
+            var user = await this.Get(Request.Email, Request.ApplicationId);
+
+            if (user == null) throw new Exception($"User with email:{Request.Email} and applicationId:{Request.ApplicationId} not exists.");
+
+            var emailResponse = await userEmailModule.SendPassword(user.Email, this.GetFullname(user), user.Application.Name);
+
+            return emailResponse.Successful;
+        }
+
         public async Task<long> Quantity()
         {
             return await context.Set<User>()
-                                .AsQueryable()
                                 .Where(x => x.IsActive == true)
                                 .LongCountAsync();
         }
         #endregion
 
         #region Private Methods
+        private async Task<User> Get(string Email, long ApplicationId)
+        {
+            return await context.Set<User>()
+                                .Include(x => x.Application)
+                                .Where(x => x.Email == Email &&
+                                            x.ApplicationId == ApplicationId)
+                                .FirstOrDefaultAsync();
+        }
+
+        private string GetFullname(User User)
+        {
+            return $"{User.FirstName} {User.LastName}";
+        }
+
         private async Task ValidateUserNotExists(string Username, int ApplicationId)
         {
             var user = await context.User.FirstOrDefaultAsync(x => x.Username == Username &&
@@ -144,6 +171,8 @@ namespace JWT.Auth.Modules
 
         private void AddRoles(User User, CreateUserRequest Request)
         {
+            if (Request.UserRoles == null) return;
+
             foreach (var userUserRole in Request.UserRoles)
             {
                 User.UserUserRole.Add(new UserUserRole()
@@ -156,6 +185,8 @@ namespace JWT.Auth.Modules
 
         private void AddUserFields(User User, CreateUserRequest Request)
         {
+            if (Request.UserFields == null) return;
+
             foreach (var userFields in Request.UserFields)
             {
                 User.UserField.Add(new UserField()

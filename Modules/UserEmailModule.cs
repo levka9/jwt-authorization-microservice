@@ -43,6 +43,22 @@ namespace JWT_Auth.Microservice.Modules
             return sendResponse;
         }
 
+        public async Task<SendResponse> SendPassword(string EmailTo, string Fullname, string SystemName)
+        {
+            string template = $"Dear {Fullname}, your password changed.";
+
+            var email = Email.From(configuration.GetSection("SendGrid:SenderDefaultEmail").Value)
+                             .To(EmailTo)
+                             .Subject($"password to {SystemName}")
+                             .Body(template, true);
+
+            var sendResponse = await sendGridSender.SendAsync(email);
+
+            CheckResponse(sendResponse);
+
+            return sendResponse;
+        }
+
         private void CheckResponse(SendResponse sendResponse)
         {
             if(!sendResponse.Successful)

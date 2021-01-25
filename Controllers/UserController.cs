@@ -70,6 +70,14 @@ namespace JWT.Auth.Controllers
             return base.GetResponse(userId);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetPassword(SendPasswordRequest Request)
+        {
+            var response = await userModule.SendPassword(Request);
+
+            return base.GetResponse(response);
+        }
+
         [HttpPut]
         public async Task<IActionResult> Create([FromBody]CreateUserRequest User)
         {
@@ -82,7 +90,9 @@ namespace JWT.Auth.Controllers
         [Authorize]
         public async Task<IActionResult> Update([FromBody]UpdateUserRequest Request)
         {
-            var response = await userModule.Update(Request);
+            long userId = (long)base.GetUserIdFromToken();
+
+            var response = await userModule.Update(Request, userId);
 
             return null;
         }

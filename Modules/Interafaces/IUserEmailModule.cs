@@ -8,6 +8,7 @@ namespace JWT_Auth.Microservice.Modules.Interafaces
 {
     public interface IUserEmailModule
     {
-        Task<SendResponse> SendChangedPasswordNotification(string EmailTo, string Fullname, float? UtcOffset);
+        Task<SendResponse> SendPassword(string EmailTo, string Fullname, string SystemName);
+        Task<SendResponse> SendChangedPasswordNotification(string EmailTo, string Fullname, float? UtcOffset);        
     }
 }
