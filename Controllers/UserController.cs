@@ -71,7 +71,7 @@ namespace JWT.Auth.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPassword(SendPasswordRequest Request)
+        public async Task<IActionResult> GetPassword([FromQuery]SendPasswordRequest Request)
         {
             var response = await userModule.SendPassword(Request);
 
