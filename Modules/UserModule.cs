@@ -122,7 +122,7 @@ namespace JWT.Auth.Modules
 
             if (user == null) throw new Exception($"User with email:{Request.Email} and applicationId:{Request.ApplicationId} not exists.");
 
-            var emailResponse = await userEmailModule.SendPassword(user.Email, this.GetFullname(user), user.Application.Name);
+            var emailResponse = await userEmailModule.SendPassword(user.Email, this.GetFullname(user), user.Password, user.Application.Name);
 
             return emailResponse.Successful;
         }
